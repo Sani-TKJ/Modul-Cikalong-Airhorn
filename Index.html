@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Basuri Telolet Player</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+  font-family: Arial, sans-serif;
+}
+
+.basuri {
+  position: relative;
+  width: 1000px;
+  max-width: 95vw;
+  aspect-ratio: 16 / 9;
+  background: url("background.jpg") center/cover no-repeat;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(0, 255, 0, 0.35);
+}
+
+/* Tombol transparan */
+.btn {
+  position: absolute;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  transition: transform 0.08s ease;
+  will-change: transform;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn:focus,
+.btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+button::-moz-focus-inner {
+  border: 0;
+}
+
+/* Posisi tombol */
+#pitchDown { left: 5.5%; top: 21%; width: 9%; aspect-ratio: 1; }
+#speedDown { left: 19.5%; top: 21%; width: 9%; aspect-ratio: 1; }
+#speedUp   { right: 19.5%; top: 21%; width: 9%; aspect-ratio: 1; }
+#pitchUp   { right: 5.5%; top: 21%; width: 9%; aspect-ratio: 1; }
+
+#prevTone  { left: 34%; top: 63%; width: 8%; aspect-ratio: 1; }
+#nextTone  { right: 34%; top: 63%; width: 8%; aspect-ratio: 1; }
+
+#stop      { left: 5%; bottom: 11%; width: 18%; height: 18%; border-radius: 20px; }
+#play      { right: 5%; bottom: 11%; width: 18%; height: 18%; border-radius: 20px; }
+
+/* Judul nada */
+.tone-title {
+  position: absolute;
+  top: 49%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  text-align: center;
+  color: #ffffff;
+  font-size: clamp(20px, 2.8vw, 40px);
+  font-weight: 900;
+  letter-spacing: 1px;
+  -webkit-text-stroke: 1px #000;
+  text-shadow:
+    0 0 4px #000,
+    0 0 8px #000,
+    0 0 12px rgba(0, 0, 0, 0.9),
+    0 0 20px #00ff66;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .tone-title {
+    width: 75%;
+    font-size: clamp(14px, 3vw, 24px);
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="basuri">
+  <audio id="teloletAudio" preload="auto"></audio>
+
+    <!-- Judul nada ditampilkan di tengah -->
+  <div class="tone-title" id="toneTitle">Basuri V1</div>
+
+  <button id="pitchDown" class="btn"></button>
+  <button id="speedDown" class="btn"></button>
+  <button id="speedUp" class="btn"></button>
+  <button id="pitchUp" class="btn"></button>
+
+  <button id="prevTone" class="btn"></button>
+  <button id="nextTone" class="btn"></button>
+
+  <button id="stop" class="btn"></button>
+  <button id="play" class="btn"></button>
+</div>
+
+<script>
+const audio = document.getElementById('teloletAudio');
+const toneTitle = document.getElementById('toneTitle');
+
+const playBtn = document.getElementById('play');
+const stopBtn = document.getElementById('stop');
+const nextToneBtn = document.getElementById('nextTone');
+const prevToneBtn = document.getElementById('prevTone');
+const speedDownBtn = document.getElementById('speedDown');
+const speedUpBtn = document.getElementById('speedUp');
+const pitchDownBtn = document.getElementById('pitchDown');
+const pitchUpBtn = document.getElementById('pitchUp');
+
+const playlist = [
+  { file: 'telolet1.mp3', title: 'Cindai' },
+  { file: 'telolet2.mp3', title: 'menteri durmaganti' },
+  { file: 'telolet3.mp3', title: 'Dracin' },
+  { file: 'telolet4.mp3', title: 'Janda Bodong' },
+  { file: 'telolet5.mp3', title: 'Kicau mania' }
+];
+
+let currentIndex = 0;
+
+function loadAudio() {
+  audio.src = playlist[currentIndex].file;
+  toneTitle.textContent = playlist[currentIndex].title;
+}
+
+
+playBtn.addEventListener('click', async () => {
+  loadAudio();
+  audio.currentTime = 0;
+  try {
+    await audio.play();
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+stopBtn.addEventListener('click', () => {
+  audio.pause();
+  audio.currentTime = 0;
+});
+
+nextToneBtn.addEventListener('click', () => {
+  currentIndex = (currentIndex + 1) % playlist.length;
+  audio.pause();
+  audio.currentTime = 0;
+  loadAudio();
+});
+
+prevToneBtn.addEventListener('click', () => {
+  currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+  audio.pause();
+  audio.currentTime = 0;
+  loadAudio();
+});
+
+speedDownBtn.addEventListener('click', () => {
+  audio.playbackRate = Math.max(0.5, audio.playbackRate - 0.1);
+});
+
+speedUpBtn.addEventListener('click', () => {
+  audio.playbackRate = Math.min(3, audio.playbackRate + 0.1);
+});
+
+pitchDownBtn.addEventListener('click', () => {
+  audio.playbackRate = Math.max(0.5, audio.playbackRate - 0.05);
+});
+
+pitchUpBtn.addEventListener('click', () => {
+  audio.playbackRate = Math.min(3, audio.playbackRate + 0.05);
+});
+
+audio.addEventListener('ended', async () => {
+  currentIndex = (currentIndex + 1) % playlist.length;
+  loadAudio();
+  try {
+    await audio.play();
+  } catch (e) {}
+});
+
+loadAudio();
+</script>
+
+</body>
+</html>
